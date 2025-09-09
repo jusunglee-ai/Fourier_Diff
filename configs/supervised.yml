@@ -1,0 +1,30 @@
+# configs/supervised.yml
+
+data:
+  type: lol          # datasets.lol.lol 클래스를 사용
+  train_dataset: LOL-v1      # 콘솔에 출력만 됨 (정보용)
+  root: "/home/jslee/LightenDiffusion/data/LOL-v1/"      # <-- 여기를 실제 경로로 수정하세요
+  batch_size: 8
+  num_workers: 8
+  patch_size: 128            # train random crop size
+  val_split: test            # 'test' 폴더를 검증/샘플링에 사용
+  ckpt_dir: ckpt/strict_lfdm
+
+model:
+  latent_ch: 256
+  latent_size: 64            # 인코더 latent spatial size (stride와 호환되게)
+
+diffusion:
+  beta_schedule: linear
+  beta_start: 0.0001
+  beta_end: 0.02
+  num_diffusion_timesteps: 1000
+
+training:
+  lr: 0.0003
+  n_epochs_stage1: 100     # AE pretrain (원하면 0으로 꺼도 됨)
+  n_epochs_stage2: 1000      # LFDM supervised
+  log_freq: 50
+  validation_freq: 1000
+  lambda1: 0.1            # L_con
+  lambda2: 0.1            # L_fre
