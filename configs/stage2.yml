@@ -1,0 +1,59 @@
+device: "cuda"
+seed: 42
+
+data:
+  root: "/home/jslee/LightenDiffusion/data/LOL-v1/"   # ★필수
+  batch_size: 8
+  num_workers: 4
+  patch_size: 256
+  ckpt_dir: '.ckpt/stage2'
+  image_folder: "./samples_stage2"
+  type: "lol"
+  conditional: true          # ★ Unet이 x_cond와 xt를 concat 하도록
+
+optim:
+  optimizer: "Adam"
+  lr: 0.00003
+  weight_decay: 0.0
+  amsgrad: false
+  eps: 0.0000001
+
+training:
+  n_epochs: 5000
+  log_interval: 10
+  validation_freq: 500
+  stage1_ckpt: "/home/jslee/LLIE/Fourier_Diff/ckpt/stage1/stage1_final.pth.tar"
+  resume: "/home/jslee/LLIE/Fourier_Diff/.ckpt/stage2/model_latest.pth.tar"
+  mode: "training"
+  # ddm.Net.load_stage1(...)가 고정 경로라면 맞춰두세요.
+  # 만약 ddm 안에서 cfg.training.stage1_ckpt를 참조하도록 이미 고쳤다면 여기에 파일 경로를 씁니다.
+  # stage1_ckpt: "ckpt/stage1/stage1_latest.pth.tar"
+
+loss:
+  lambda_con: 1.0
+  lambda_fre: 0.01
+
+# Unet/확산 설정
+model:
+       # ★ ddm.Net가 LBM/LFFM 채널 계산할 때 씀
+  ch: 128
+  ch_mult: [1, 2, 2]
+  num_res_blocks: 2
+  dropout: 0.0
+  resamp_with_conv: true
+
+  # 입력/출력 채널 주의!
+  # Decomposer low phase P의 채널수 = 2C → cos/sin → 4C
+  # Unet은 conditional=True면 내부에서 x와 xt를 concat해서 '2 * in_channels'를 입력으로 사용.
+  # 따라서 model.in_channels = 4C, out_ch = 4C 로 설정해야 최종 입력(8C)과 출력(4C)이 맞습니다.
+  in_channels: 256           # 4*C (C=64)
+  out_ch: 256                # 4*C
+
+
+diffusion:
+  beta_schedule: "linear"
+  beta_start: 1.0e-4
+  beta_end: 0.02
+  num_diffusion_timesteps: 1000
+  num_sampling_timesteps: 50
+

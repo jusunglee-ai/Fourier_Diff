@@ -1,0 +1,28 @@
+device: "cuda"
+seed: 42
+
+data:
+  root: "/home/jslee/LightenDiffusion/data/LOL-v1/"   # ★필수: LOL-v1 루트
+  batch_size: 8
+  num_workers: 4
+  patch_size: 256
+  ckpt_dir: "./ckpt/stage1"
+  image_folder: "./samples_stage1"
+
+optim:
+  optimizer: "Adam"
+  lr: 1.0e-4
+  weight_decay: 0.0
+  amsgrad: false
+  eps: 1.0e-8
+
+training:
+  n_epochs: 200
+  log_interval: 50
+  validation_freq: 1000      # (Stage-2에 사용됨) step 단위 — 남겨둬도 무방
+  val_every_epochs: 50       # ★ Stage-1: 에폭 단위 검증 주기
+  val_save_n: 4
+  mode: "training"
+
+model:
+  base_channels: 64
